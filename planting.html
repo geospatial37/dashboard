@@ -1181,6 +1181,7 @@ function tanamanDesc(planted,total,tanaman){
 function renderTanamanPanel(){
   let src=null;
   if(currentPreset==='year'&&filterYear!==null)src=cumulativeData.byYear[filterYear]||null;
+  else if(currentPreset==='ytd')src=cumulativeData.byYear[new Date().getFullYear()]||cumulativeData.general;
   else src=cumulativeData.general;
   if(src){
     setText('sTanamanTotal',fmtInt(src.agroTanaman+src.tembTanaman));
@@ -2237,5 +2238,6 @@ function toggleDlMenu(wrapId){
 function closeDlOut(e){if(!e.target.closest('.dl-dropdown-wrap'))closeAllDlMenus();}
 function closeAllDlMenus(){document.querySelectorAll('.dl-dropdown-menu').forEach(m=>m.classList.remove('open'));document.removeEventListener('click',closeDlOut);}
 </script>
+<script src="auth-guard.js"></script>
 </body>
 </html>
