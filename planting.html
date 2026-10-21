@@ -309,7 +309,7 @@ body{display:flex;flex-direction:column}
 
 <header class="site-navbar">
   <div class="site-navbar-brand">
-    <img src="../assets/logo/Sanggala_color.png" alt="Logo Sanggala Corridor Project">
+    <img src="assets/logo/Sanggala_color.png" alt="Logo Sanggala Corridor Project">
     <span>SANGGALA CORRIDOR PROJECT</span>
   </div>
   <nav class="site-navbar-menu">
@@ -1232,7 +1232,7 @@ async function getJSON(u){const r=await fetchWithTimeout(u);if(!r.ok)throw Error
     if(fuTxt)parseFollowUp(fuTxt);
     populateYearDropdowns();
     setLoad('Memuat GeoJSON...');
-    const [agroJ,cmiJ]=await Promise.all([getJSON('../assets/json/agro.json'+CACHE_BUST),getJSON('../assets/json/CMI.json'+CACHE_BUST)]);
+    const [agroJ,cmiJ]=await Promise.all([getJSON('assets/json/agro.json'+CACHE_BUST),getJSON('assets/json/CMI.json'+CACHE_BUST)]);
     setLoad('Merender peta...');
     renderCMI(cmiJ);renderAgro(agroJ);
     setPreset('ytd');fitAll();hideLoad();renderTanamanPanel();

@@ -241,7 +241,7 @@
 <body>
 <header class="site-navbar">
   <div class="site-navbar-brand">
-    <img src="../assets/logo/Sanggala_color.png" alt="Logo Sanggala Corridor Project">
+    <img src="assets/logo/Sanggala_color.png" alt="Logo Sanggala Corridor Project">
     <span>SANGGALA CORRIDOR PROJECT</span>
   </div>
   <nav class="site-navbar-menu">
@@ -751,8 +751,8 @@ function switchBasemap(id){
 const map=L.map('map',{center:[0.8,110.325],zoom:13,zoomControl:false,attributionControl:false});
 basemaps['esri_imagery'].addTo(map);
 
-const lulc    =L.tileLayer('../assets/tiles/lulc_23/{z}/{x}/{y}.png',{opacity:1});
-const lulc2025=L.tileLayer('../assets/tiles/lulc_25/{z}/{x}/{y}.png',{opacity:1});
+const lulc    =L.tileLayer('assets/tiles/lulc_23/{z}/{x}/{y}.png',{opacity:1});
+const lulc2025=L.tileLayer('assets/tiles/lulc_25/{z}/{x}/{y}.png',{opacity:1});
 let boundaryLayer,mapBounds;
 const pointLayer  =L.layerGroup().addTo(map);
 
@@ -770,7 +770,7 @@ function updateRktLabelsVisibility(){
 }
 function loadRktLayer(){
   if(rktLoaded)return Promise.resolve();
-  return fetch('../assets/json/rkt_baru.geojson')
+  return fetch('assets/json/rkt_baru.geojson')
     .then(r=>r.ok?r.json():Promise.reject(r.status))
     .then(geojson=>{
       rktGeoJsonLayer=L.geoJSON(geojson,{
@@ -785,7 +785,7 @@ function loadRktLayer(){
       rktLoaded=true;
       updateRktLabelsVisibility();
     })
-    .catch(err=>{console.warn('Petak RKT not loaded (../assets/json/rkt_baru.geojson):',err);rktLoaded=true;});
+    .catch(err=>{console.warn('Petak RKT not loaded (assets/json/rkt_baru.geojson):',err);rktLoaded=true;});
 }
 loadRktLayer().then(()=>{if(document.getElementById('toggleRkt').checked)map.addLayer(rktLayer);});
 document.getElementById('toggleRkt').addEventListener('change',async function(){
@@ -804,7 +804,7 @@ const trackLayers={},trackLoaded={};
 function loadTrackLayer(cfg){
   return new Promise(resolve=>{
     if(trackLoaded[cfg.id]){resolve();return;}
-    fetch(`../assets/json/track/${cfg.file}`)
+    fetch(`assets/json/track/${cfg.file}`)
       .then(r=>r.ok?r.json():Promise.reject(r.status))
       .then(geojson=>{
         const lg=L.layerGroup();
@@ -837,7 +837,7 @@ const fireCluster=L.markerClusterGroup({
   }
 });
 
-fetch('../assets/json/CMI.json').then(r=>r.json()).then(j=>{
+fetch('assets/json/CMI.json').then(r=>r.json()).then(j=>{
   boundaryLayer=L.geoJSON(j,{style:{color:'#7c3aed',weight:2.5,fillOpacity:0,dashArray:'8 4'}}).addTo(map);
   mapBounds=boundaryLayer.getBounds();
   map.fitBounds(mapBounds,{paddingTopLeft:[0,0]});

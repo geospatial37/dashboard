@@ -7,11 +7,11 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
-<link rel="icon" type="image/png" href="../assets/icons/favicon.png">
+<link rel="icon" type="image/png" href="assets/icons/favicon.png">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
-<link rel="stylesheet" href="../assets/css/dashboard.css">
+<link rel="stylesheet" href="assets/css/dashboard.css">
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
   html,body{height:100%;overflow:hidden;font-family:'Libre Franklin', sans-serif;background:var(--color-cream);color:var(--color-ink)}
@@ -114,7 +114,7 @@
 
 <header class="site-navbar">
   <div class="site-navbar-brand">
-    <img src="../assets/logo/Sanggala_color.png" alt="Logo Sanggala Corridor Project">
+    <img src="assets/logo/Sanggala_color.png" alt="Logo Sanggala Corridor Project">
     <span>SANGGALA CORRIDOR PROJECT</span>
   </div>
   <nav class="site-navbar-menu">
@@ -374,7 +374,7 @@ const LAYERS={
            note:'Animasi 3 jam terakhir, interval 10 menit. Hanya bermakna pada siang hari.'}
 };
 const FRAME_MS=700;
-const CMI_URL='../assets/json/CMI.json';
+const CMI_URL='assets/json/CMI.json';
 
 let activeKey='ir',frames=[],frameLayers=[],idx=0,timer=null,opacity=.75,loadToken=0;
 

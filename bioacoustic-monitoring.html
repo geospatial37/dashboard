@@ -207,7 +207,7 @@
 <body>
 <header class="site-navbar">
   <div class="site-navbar-brand">
-    <img src="../assets/logo/Sanggala_color.png" alt="Logo Sanggala Corridor Project">
+    <img src="assets/logo/Sanggala_color.png" alt="Logo Sanggala Corridor Project">
     <span>SANGGALA CORRIDOR PROJECT</span>
   </div>
   <nav class="site-navbar-menu">
@@ -478,12 +478,12 @@ function switchBasemap(id){
 const map=L.map('map',{center:[0.8,110.325],zoom:13,zoomControl:false,attributionControl:false});
 basemaps['esri_imagery'].addTo(map);
 
-const lulc=L.tileLayer('../assets/tiles/lulc_23/{z}/{x}/{y}.png',{opacity:1});
+const lulc=L.tileLayer('assets/tiles/lulc_23/{z}/{x}/{y}.png',{opacity:1});
 let boundaryLayer,mapBounds;
 const ctGridLayer =L.layerGroup().addTo(map);
 const ctPointLayer=L.layerGroup().addTo(map);
 
-fetch('../assets/json/CMI.json').then(r=>r.json()).then(j=>{
+fetch('assets/json/CMI.json').then(r=>r.json()).then(j=>{
   boundaryLayer=L.geoJSON(j,{style:{color:'#7c3aed',weight:2.5,fillOpacity:0,dashArray:'8 4'}}).addTo(map);
   mapBounds=boundaryLayer.getBounds();
   map.fitBounds(mapBounds,{paddingTopLeft:[0,0]});
@@ -499,7 +499,7 @@ document.addEventListener('click',e=>{if(filterPanel.classList.contains('open')&
 
 const CT_SHEET_ID='1NJPa0nnULKqlihlkZo7J9M6gALi71LZ2_cs-0qz8SuI';
 const CT_SHEET_URL=`https://docs.google.com/spreadsheets/d/${CT_SHEET_ID}/export?format=csv&gid=2033661649`;
-const CT_GRID_URL='../assets/json/Grid.json';
+const CT_GRID_URL='assets/json/Grid.json';
 let ctData=[],ctGridGeo=null,ctLoaded=false;
 const CTF={batch:'',site:'',kelas:'',spesies:'',iucn:'',callType:'',validated:''};
 let allCtBatches=[],allCtSites=[],allCtClasses=[],allCtSpecies=[],allCtIucns=[],allCtCallTypes=[],allCtValidated=[];
