@@ -4,14 +4,15 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Fire and Forest Patrol Protection | Sanggala Corridor Project</title>
-  <link rel="icon" type="image/png" href="assets/icons/favicon.png?v=2">
+  <link rel="icon" type="image/png" href="../assets/icons/favicon.png?v=2">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://unpkg.com/papaparse@5.4.1/papaparse.min.js"></script>
-  <link rel="stylesheet" href="assets/css/dashboard.css">
+<script src="../assets/js/sheet-utils.js"></script>
+  <link rel="stylesheet" href="../assets/css/dashboard.css">
 <style>
     *{box-sizing:border-box;margin:0;padding:0;font-family:'Libre Franklin',sans-serif}
     html,body{height:100%;overflow:hidden;background:#FFFAF3}
@@ -30,11 +31,11 @@
 
     .stat-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-bottom:16px}
     @media (max-width:900px){.stat-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-    .stat-card{background:#fff;border:1px solid var(--color-sand);border-radius:14px;padding:16px}
-    .stat-label{font-size:11px;color:#6A665B;font-weight:600;margin-bottom:10px}
+    .stat-card{background:#fff;border:1px solid var(--color-sand);border-radius:14px;padding:18px 20px}
+    .stat-label{font-size:13px;color:#6A665B;font-weight:600;margin-bottom:8px}
     .stat-value-row{display:block}
-    .stat-value{display:block;font-size:22px;font-weight:800;color:var(--color-pine);line-height:1}
-    .stat-sub-plain{display:block;font-size:10.5px;color:#6A665B;font-weight:600;margin-top:5px}
+    .stat-value{display:block;font-size:28px;font-weight:800;color:var(--color-pine);line-height:1;letter-spacing:-.01em}
+    .stat-sub-plain{display:block;font-size:10.5px;color:#6A665B;font-weight:500;line-height:1.45;margin-top:8px}
     .fdrs-row{display:flex;flex-wrap:wrap;gap:6px 14px}
     .fdrs-item{display:flex;align-items:center;gap:6px}
     .fdrs-loc{font-size:10.5px;font-weight:700;color:#6A665B}
@@ -55,7 +56,7 @@
     .comp-total{font-size:11px;font-weight:600;color:#6A665B}
     .comp-chart{display:flex;flex-direction:column;gap:2px}
     .comp-row{display:grid;grid-template-columns:150px minmax(0,1fr);align-items:center;gap:12px;padding:4px 6px;margin:0 -6px;border-radius:6px;cursor:default}
-    .comp-row:hover{background:var(--color-cream)}
+    .comp-row:hover{background:var(--primary-bg)}
     .comp-lbl{font-size:11.5px;color:#3A342C;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .comp-track{display:flex;align-items:center;gap:8px;min-width:0}
     .comp-bar{height:14px;background:var(--color-pine);border-radius:0 4px 4px 0;min-width:2px;flex-shrink:0}
@@ -124,7 +125,7 @@
     }
     table.detection-table tbody td{padding:7px 8px;border-bottom:1px solid #f3f4f6;color:#3A342C;vertical-align:top}
     table.detection-table tbody tr{cursor:pointer;transition:background .1s}
-    table.detection-table tbody tr:hover td{background:#FFFAF3}
+    table.detection-table tbody tr:hover td{background:var(--primary-bg)}
     table.detection-table tbody tr:last-child td{border-bottom:none}
     table.detection-table tbody td:last-child a{color:var(--color-fern);font-weight:600;text-decoration:none}
     table.detection-table tbody td:last-child a:hover{text-decoration:underline}
@@ -132,15 +133,15 @@
     .illegal-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-bottom:16px}
     @media (max-width:900px){.illegal-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
     .illegal-card{
-      background:#fff;border:1px solid var(--color-sand);border-radius:14px;padding:16px;
+      background:#fff;border:1px solid var(--color-sand);border-radius:14px;padding:18px 20px;
       cursor:pointer;transition:box-shadow .15s,border-color .15s;
     }
     .illegal-card:hover{box-shadow:0 1px 3px rgba(0,0,0,.07)}
     .illegal-card.active{border-color:var(--color-pine);box-shadow:0 4px 14px rgba(53,103,96,.15)}
-    .illegal-label{display:flex;align-items:center;gap:6px;font-size:11px;color:#6A665B;font-weight:600;margin-bottom:10px}
+    .illegal-label{display:flex;align-items:center;gap:6px;font-size:13px;color:#6A665B;font-weight:600;margin-bottom:8px}
     .illegal-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;display:inline-block}
-    .illegal-value{font-size:22px;font-weight:800;color:var(--color-pine);line-height:1}
-    .illegal-sub{font-size:10.5px;color:#6A665B;font-weight:600;margin-top:5px}
+    .illegal-value{font-size:28px;font-weight:800;color:var(--color-pine);line-height:1;letter-spacing:-.01em}
+    .illegal-sub{font-size:10.5px;color:#6A665B;font-weight:500;line-height:1.45;margin-top:8px}
 
     .cta-bar{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;padding:14px 0}
     .cta-text{font-size:13px;color:#3A342C;line-height:1.6;max-width:640px}
@@ -162,7 +163,7 @@
 <body>
 <header class="site-navbar">
   <div class="site-navbar-brand">
-    <img src="assets/logo/Sanggala_color.png" alt="Logo Sanggala Corridor Project">
+    <img src="../assets/logo/Sanggala_color.png" alt="Logo Sanggala Corridor Project">
     <span>SANGGALA CORRIDOR PROJECT</span>
   </div>
   <nav class="site-navbar-menu">
@@ -388,7 +389,7 @@ const SUBMISSION_URL=`https://docs.google.com/spreadsheets/d/${SUBMISSION_SHEET_
 
 const HUNTING_FINDINGS=['gunshot_sound','hunter_shelter','wildlife_trap'];
 
-const PROJECT_BOUNDARY_URL='assets/json/CMI.json';
+const PROJECT_BOUNDARY_URL='../assets/json/CMI.json';
 
 const ILLEGAL_COLORS={logging:'#c2703f',hunting:'#dc2626',mining:'#7c3aed',other:'#6A665B'};
 const ILLEGAL_LABELS={logging:'Logging',hunting:'Hunting',mining:'Mining',other:'Other'};
@@ -416,7 +417,6 @@ function bioCategoryOf(finding,categ){
 const FIRE_COLORS={potential:'#f59e0b',burnt:'#991b1b',hotspot:'#db2777',prevention:'#2563eb'};
 const FIRE_LABELS={potential:'Potential Fire Area',burnt:'Burnt Area',hotspot:'Hotspot Ground Check',prevention:'Water Point & Firebreak'};
 
-// "ground chek hotspot" (salah ketik di sheet) terbaca lewat kata "hotspot"
 function fireCategoryOf(finding,categ){
   if(categ!=='fire')return null;
   if(finding.includes('potential'))return'potential';
@@ -436,28 +436,13 @@ function parseDateDMY(s){
   if(!m)return null;
   return toMidnight(+m[3],+m[2]-1,+m[1]);
 }
-function parseDateTimeLoose(s){
-  s=(s||'').trim();if(!s)return null;
-  const [datePart,timePart]=s.split(' ');
-  const dm=datePart.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-  if(!dm)return null;
-  const day=+dm[1],month=+dm[2],year=+dm[3];
-  let h=0,mi=0,se=0;
-  if(timePart){const tm=timePart.split(':').map(Number);h=tm[0]||0;mi=tm[1]||0;se=tm[2]||0;}
-  return new Date(year,month-1,day,h,mi,se);
-}
+function parseDateTimeLoose(s){return sheetDate(s,'dmy');}
 function dateKey(d){
   if(!d)return null;
   const pad=n=>String(n).padStart(2,'0');
   return `${pad(d.getDate())}-${pad(d.getMonth()+1)}-${d.getFullYear()}`;
 }
 function fmtDateID(d){return d?d.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'}):'–';}
-function fmtDateTimeID(d){
-  if(!d)return '–';
-  const date=d.toLocaleDateString('en-GB',{year:'numeric',month:'2-digit',day:'2-digit'});
-  const time=d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});
-  return `${date} ${time} WIB`;
-}
 function fmtNumberID(n){return n.toLocaleString('id-ID',{maximumFractionDigits:1});}
 
 function fetchCsv(url){
@@ -490,15 +475,10 @@ function pickFieldExactOrPartial(row,...patterns){
   return undefined;
 }
 
-// FDRS: rating terbaru per lokasi, tidak mengikuti filter
 const FDRS_SHEET_ID='1BFHIizqJZdzJ-ZHt0X9etrDgIMY3Wr4rnIzWovJv2xA';
 const FDRS_URL=`https://docs.google.com/spreadsheets/d/${FDRS_SHEET_ID}/gviz/tq?tqx=out:csv&gid=0&headers=0&t=${Date.now()}`;
 const FDRS_MONTHS={jan:0,feb:1,mar:2,apr:3,may:4,mei:4,jun:5,jul:6,aug:7,agu:7,sep:8,oct:9,okt:9,nov:10,dec:11,des:11};
-function parseFdrsDate(v){
-  const m=(v||'').toString().trim().match(/^(\d{1,2})[\s-]+([A-Za-z]{3})[A-Za-z]*\.?[\s-]+(\d{4})$/);
-  if(!m||FDRS_MONTHS[m[2].toLowerCase()]===undefined)return null;
-  return toMidnight(+m[3],FDRS_MONTHS[m[2].toLowerCase()],+m[1]);
-}
+function parseFdrsDate(v){return sheetDate(v,'dmy');}
 async function loadFdrs(){
   const rows=await fetchCsv(FDRS_URL);
   const cell=(r,i)=>((r&&r[i])||'').toString().trim();
@@ -538,10 +518,9 @@ async function loadAll(){
       const luasDirect=parseFloat((r[7]||'').toString().trim());
       const luasRaw=(r[7]||'').toString().trim().replace(/\./g,'').replace(',','.');
       const luas=!isNaN(luasDirect)?luasDirect:parseFloat(luasRaw);
-      // Kolom G = panjang rute (m, koma ribuan), D = jalur patroli
       const panjang=parseFloat((r[6]||'').toString().trim().replace(/,/g,''));
       const jalur=(r[3]||'').toString().trim();
-      const jenis=(r[2]||'').toString().trim(); // kolom C = jenis patroli (Patroli Api / Illegal Activities)
+      const jenis=(r[2]||'').toString().trim();
       return{date:d,luas:isNaN(luas)?0:luas,panjang:isNaN(panjang)?0:panjang,jalur,jenis};
     }).filter(e=>e.date);
   }
@@ -590,7 +569,6 @@ let years=[],currentQuarterFilter=null;
 let periodMode='yq',weekYear=new Date().getFullYear(),weekMonth=new Date().getMonth(),weekIdx=null;
 const MONTH_NAMES=['January','February','March','April','May','June','July','August','September','October','November','December'];
 
-// Minggu = Sabtu–Jumat
 function getWeeksInMonth(yr,mo){
   let sat=new Date(yr,mo,1);sat.setDate(sat.getDate()-((sat.getDay()+1)%7));
   const last=new Date(yr,mo+1,0),weeks=[];let n=1;
@@ -775,7 +753,6 @@ function jenisLabel(j){
   if(t.includes('illegal'))return'illegal activity patrol';
   return j?j.toLowerCase()+' patrol':'unspecified patrol';
 }
-// Nama utama dari deskripsi, mis. "Naja sumatrana (juvenile)" -> "Naja sumatrana"
 function speciesName(desc){
   const s=(desc||'').split('(')[0].trim();
   return s&&s.length<=40?s:null;

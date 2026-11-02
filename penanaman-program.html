@@ -4,13 +4,14 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>Monitoring</title>
-<link rel="icon" type="image/png" href="assets/icons/favicon.png?v=2">
+<link rel="icon" type="image/png" href="../assets/icons/favicon.png?v=2">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script><link rel="preconnect" href="https://fonts.googleapis.com">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script src="../assets/js/sheet-utils.js"></script><link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/dashboard.css">
+<link rel="stylesheet" href="../assets/css/dashboard.css">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;font-family:inherit}
 html,body{height:100%;overflow:hidden;font-family:'Libre Franklin',system-ui,sans-serif;font-size:14px;color:var(--text);background:var(--bg)}
@@ -19,13 +20,6 @@ body{display:flex;flex-direction:column}
 .page-scroll{flex:1;min-height:0;overflow-y:auto;scrollbar-gutter:stable}
 .content-row{max-width:1180px;margin:0 auto;padding:28px 36px 48px;display:flex;align-items:flex-start;gap:20px}
 
-.stat-pairs{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-bottom:16px;flex-shrink:0}
-.pair-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-@media (max-width:900px){.stat-pairs{grid-template-columns:1fr;gap:14px}}
-.stat-card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:16px 16px}
-.stat-lbl{font-size:11px;color:var(--text-2);font-weight:600;margin-bottom:10px}
-.stat-val{font-size:22px;font-weight:800;color:var(--primary);line-height:1}
-.stat-sub{font-size:10.5px;color:var(--text-2);font-weight:600;margin-top:5px}
 
 .filter-group{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px;flex-shrink:0}
 .explore-filters{display:flex;gap:8px;flex-wrap:wrap}
@@ -41,7 +35,6 @@ body{display:flex;flex-direction:column}
 
 .explore-count{font-size:10.5px;color:var(--text-3);margin:8px 0 6px;flex-shrink:0}
 
-/* Tinggi diatur oleh fitExploreRow() (JS); nilai CSS ini hanya cadangan sebelum JS berjalan */
 .explore-row{height:calc(100vh - 380px);min-height:320px;display:flex;gap:16px;align-items:stretch}
 .lahan-list-wrap{flex:1 1 0%;min-width:0;min-height:0;transition:flex .25s ease;display:flex}
 .lahan-list{flex:1;min-height:0;border:1px solid var(--border);border-radius:14px;overflow-y:auto;background:#fff}
@@ -87,13 +80,29 @@ body{display:flex;flex-direction:column}
 .detail-row:last-child{border-bottom:none}
 .detail-row-lbl{color:var(--text-3);font-size:10px;text-transform:uppercase;letter-spacing:.4px}
 .detail-row-val{font-weight:400;color:var(--text)}
+.mon-log{border-bottom:1px solid var(--border-lt)}
+.mon-log:last-child{border-bottom:none}
+.mon-log>summary{list-style:none;display:flex;align-items:center;gap:10px;padding:8px 16px;cursor:pointer;font-size:11.5px;color:var(--text)}
+.mon-log>summary::-webkit-details-marker{display:none}
+.mon-log>summary:hover{background:var(--primary-bg)}
+.mon-log[open]>summary{background:var(--primary-bg)}
+.mon-log-chev{width:10px;color:var(--text-3);font-size:9px;transition:transform .15s;flex-shrink:0}
+.mon-log[open] .mon-log-chev{transform:rotate(90deg)}
+.mon-log-date{color:var(--text-2);white-space:nowrap;min-width:78px;font-size:10.5px}
+.mon-log-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.mon-log-title{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mon-log-qty{color:var(--text-2);white-space:nowrap;font-size:10.5px}
+.mon-log-body{padding:4px 16px 12px 42px}
+.mon-item-meta{font-size:10.5px;color:var(--text-2);margin-bottom:4px}
+.mon-item-note{font-size:11px;color:var(--text-2);font-style:italic;margin-top:6px}
+.mon-tag{font-size:9.5px;font-weight:600;color:var(--primary);background:var(--primary-bg);border-radius:8px;padding:1px 6px;margin-left:6px}
 </style>
 </head>
 <body>
 
 <header class="site-navbar">
   <div class="site-navbar-brand">
-    <img src="assets/logo/Sanggala_color.png" alt="Logo Sanggala Corridor Project">
+    <img src="../assets/logo/Sanggala_color.png" alt="Logo Sanggala Corridor Project">
     <span>SANGGALA CORRIDOR PROJECT</span>
   </div>
   <nav class="site-navbar-menu">
@@ -107,8 +116,10 @@ body{display:flex;flex-direction:column}
 <div class="dashboard-frame">
   <div class="hero">
     <div class="hero-inner">
-      <div class="hero-title">Monitoring</div>
-      <div class="hero-date" id="heroDate">Memuat tanggal...</div>
+      <div>
+        <div class="hero-title">Monitoring</div>
+        <div class="hero-date" id="heroDate">Memuat tanggal...</div>
+      </div>
     </div>
   </div>
 
@@ -132,7 +143,14 @@ body{display:flex;flex-direction:column}
 const SHEET_ID='1-LHCIUy1iD154WczY4Da_-iRaILtvL0mOW4gRW6YQac',SHEET_NAME='ARR_SUMMARY';
 const CACHE_BUST='?v='+Date.now();
 const CSV_URL=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(SHEET_NAME)}`;
-const AGRO_JSON_URL='assets/json/agro.json'+CACHE_BUST;
+const AGRO_JSON_URL='../assets/json/agro.json'+CACHE_BUST;
+const MON_SHEET_ID='1DRYnz-86Gx7mIzGaeNzUUd9xz_HoxwCgF4W-lLsOYjk',MON_SHEET_NAME='Sheet1';
+const MON_CSV_URL=`https://docs.google.com/spreadsheets/d/${MON_SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(MON_SHEET_NAME)}`;
+const MON_CAT={
+  Planting:{label:'Penanaman',color:'#1a6b3a'},
+  Calculation:{label:'Permintaan Bibit',color:'#0d5c8a'},
+  Pemupukan:{label:'Pemupukan',color:'#b84c00'},
+};
 
 const PROG={
   Agro_Reg:{label:'Agro Reguler',group:'agro',dot:'#1a6b3a'},
@@ -142,17 +160,12 @@ const PROG={
 };
 
 const str=v=>(v??'').toString().trim();
-const num=v=>parseFloat(str(v))||0;
+const num=v=>sheetNum(v);
 const fmt=v=>(+v||0).toLocaleString('id-ID',{minimumFractionDigits:2,maximumFractionDigits:2});
 const fmtInt=v=>(+v||0).toLocaleString('id-ID',{minimumFractionDigits:0,maximumFractionDigits:0});
 const esc=x=>str(x).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
-function parseDate(s){
-  if(!s)return null;const c=str(s).trim();
-  const m=c.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
-  if(m)return new Date(+m[3],+m[1]-1,+m[2]);
-  const d=new Date(c);return isNaN(d)?null:d;
-}
+function parseDate(s){return sheetDate(s,'mdy');}
 function fmtDate(s){if(!s)return'';const d=parseDate(s);return d?d.toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'}):'';}
 
 function resolveProgram(aReg,aBPO,tReg,tMTL,tipe){
@@ -185,7 +198,6 @@ function pickCI(raw,keys,...names){
   for(const kk of keys){if(wanted.includes(norm(kk)))return raw[kk];}
   return undefined;
 }
-// Baca kolom lewat nama header; posisi kolom hanya cadangan
 function colV(raw,keys,names,idx){
   const v=pickCI(raw,keys,...names);
   if(v!==undefined)return v;
@@ -197,7 +209,6 @@ let EXISTING_PLANT_COLS=[],PLANTED_PLANT_COLS=[];
 
 function parseSheet(csv){
   const {data}=Papa.parse(csv,{header:true,skipEmptyLines:true,transformHeader:h=>h.trim()});
-  // Header "E-<jenis>" = tanaman eksisting, "P-<jenis>" = tanaman program
   const headerKeys=data.length?Object.keys(data[0]):[];
   EXISTING_PLANT_COLS=[];PLANTED_PLANT_COLS=[];
   headerKeys.forEach(h=>{
@@ -219,15 +230,54 @@ function parseSheet(csv){
     const k=i=>keys[i]?str(raw[keys[i]]):'';
     const luasAgro=num(colV(raw,keys,['luas_agro','Luas_Agro'],45));
     const luasTemb=num(colV(raw,keys,['luas_temb','Luas_Temb'],46));
-    const jumlahTanaman=num(colV(raw,keys,['Total_Tanaman','Total Tanaman','Jumlah_Tanaman'],49));
     const existingPlants=EXISTING_PLANT_COLS.map(c=>({name:c.name,count:num(raw[c.header])})).filter(p=>p.count>0);
-    const plantedPlants=PLANTED_PLANT_COLS.map(c=>({name:c.name,count:num(raw[c.header])})).filter(p=>p.count>0);
+    const tglTanam=parseDate(tglRealisasi);
+    const plantEvents=tglTanam?PLANTED_PLANT_COLS.map(c=>({d:tglTanam,name:c.name,n:num(raw[c.header])})).filter(e=>e.n>0):[];
     const prog=resolveProgram(aReg,aBPO,tReg,tMTL,tipe);
-    if(!prog)return; // fokus halaman ini: lahan program Agroforestri/Reforestasi saja
+    if(!prog)return;
     const _luasAgro=luasAgro>0?luasAgro:aReg+aBPO;
     const _luasTemb=luasTemb>0?luasTemb:tReg+tMTL;
-    sheetMap[id]={id,kth,desa,petani,jk,tglPartisipasi,tglRealisasi,luasAgro:_luasAgro,luasTemb:_luasTemb,prog,jumlahTanaman,existingPlants,plantedPlants};
+    sheetMap[id]={id,kth,desa,petani,jk,tglPartisipasi,luasAgro:_luasAgro,luasTemb:_luasTemb,prog,existingPlants,plantEvents};
   });
+}
+function parseTanam(csv){
+  const log=parseActivityLog(csv);
+  if(!log.hasTanam)return;
+  Object.values(sheetMap).forEach(r=>{r.plantEvents=log.tanam[monKey(r.id)]||[];});
+}
+const sumPlants=ev=>ev.reduce((a,e)=>a+e.n,0);
+const tanamUpTo=(r,end)=>r.plantEvents.filter(e=>e.d<=end);
+const tanamDays=ev=>[...new Set(ev.map(e=>+e.d))].map(t=>new Date(t));
+const plantTotals=ev=>Object.entries(ev.reduce((o,e)=>(o[e.name]=(o[e.name]||0)+e.n,o),{})).map(([name,count])=>({name,count})).filter(p=>p.count>0);
+
+let monMap={};
+const monKey=s=>str(s).toUpperCase();
+const monVal=v=>{const s=str(v);return s==='#N/A'?'':s;};
+function parseMonDate(s){
+  const m=str(s).match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  return m?new Date(+m[1],+m[2]-1,+m[3]):parseDate(s);
+}
+
+function parseMonitoring(csv){
+  const {data}=Papa.parse(csv,{header:true,skipEmptyLines:true,transformHeader:h=>h.trim()});
+  monMap={};
+  data.forEach(raw=>{
+    const kode=monKey(monVal(raw['Kode Petak']));if(!kode)return;
+    const date=parseMonDate(raw['Tanggal']);
+    const cat=monVal(raw['Activities Category']),interv=monVal(raw['Tipe Intervensi']);
+    const list=monMap[kode]||(monMap[kode]=[]);
+    const gk=[date?date.getTime():'',cat,interv].join('|');
+    let ev=list.find(e=>e.gk===gk);
+    if(!ev){ev={gk,date,cat,interv,program:monVal(raw['Tipe Program']),plants:[],pupuk:new Set(),notes:new Set()};list.push(ev);}
+    const jenis=monVal(raw['Jenis Tanaman']);
+    if(jenis){
+      const name=jenis.charAt(0).toUpperCase()+jenis.slice(1);
+      ev.plants.push({name,count:num(raw['Jumlah']),grafted:str(raw['Grafted']).toUpperCase()==='YES'});
+    }
+    const pupuk=monVal(raw['Jenis Pupuk']);if(pupuk)ev.pupuk.add(pupuk);
+    const note=monVal(raw['Remarks']);if(note)ev.notes.add(note);
+  });
+  Object.values(monMap).forEach(list=>list.sort((a,b)=>(b.date||0)-(a.date||0)));
 }
 
 function setupFilterOptions(){
@@ -285,13 +335,24 @@ function matchesTime(r){
   }
   return true;
 }
+function timeEnd(){
+  const now=new Date();
+  let end=now;
+  if(timePreset==='year'&&timeYear!=null)end=new Date(timeYear,12,0,23,59,59);
+  else if(timePreset==='month'&&timeYear!=null&&timeMonth!=null)end=new Date(timeYear,timeMonth+1,0,23,59,59);
+  else if(timePreset==='week'&&timeWeekYear!=null&&timeWeekMonth!=null){const wk=getWeeksInMonth(timeWeekYear,timeWeekMonth)[timeWeekIdx];if(wk)end=wk.fri;}
+  else if(timePreset==='custom'&&timeCustomEnd)end=timeCustomEnd;
+  return end<now?end:now;
+}
+const pupukDates=(id,end)=>(monMap[monKey(id)]||[]).filter(e=>e.date&&e.date<=end&&/^pemupukan$/i.test(e.cat)).map(e=>e.date);
 function matchesKTH(r,k){
   if(!k)return true;
   return r.kth===k;
 }
 function matchesStatus(r,f){
   if(f==='all')return true;
-  return !!parseDate(r.tglRealisasi);
+  const days=tanamDays(tanamUpTo(r,timeEnd())).length;
+  return f==='tambah'?days>1:days>0;
 }
 
 function getFilteredRows(){
@@ -336,32 +397,65 @@ function renderList(){
 }
 
 function computeStats(){
-  const rows=getFilteredRows();
-  let luasTotal=0,luasAgro=0,luasTemb=0,tanamanTotal=0,luasTertanam=0;
-  const petaniSet=new Set(),laki=new Set(),perempuan=new Set();
+  const rows=getFilteredRows(),end=timeEnd();
+  let luasTotal=0,luasAgro=0,luasTemb=0,tanamanAgro=0,luasTertanam=0,tanamAgro=0,tanamTemb=0,pupukAgro=0,pupukTemb=0,bothAgro=0,bothTemb=0,lahanAgro=0,lahanTemb=0,petakPupukAgro=0,petakPupukTemb=0,aplikasiAgro=0,aplikasiTemb=0,addPetakAgro=0,addPetakTemb=0,addTanAgro=0;
+  const petaniSet=new Set(),laki=new Set(),perempuan=new Set(),petaniAgro=new Set(),petaniTemb=new Set();
   rows.forEach(r=>{
     const st=PROG[r.prog];
-    const luas=st.group==='agro'?r.luasAgro:r.luasTemb;
+    const agro=st.group==='agro';
+    const luas=agro?r.luasAgro:r.luasTemb;
     luasTotal+=luas;
-    if(st.group==='agro')luasAgro+=luas;else luasTemb+=luas;
-    tanamanTotal+=r.jumlahTanaman;
-    if(parseDate(r.tglRealisasi))luasTertanam+=luas;
-    // Petani dihitung hanya bila Jenis Kelamin terisi (sama dengan planting-summary)
+    const ev=tanamUpTo(r,end),planted=ev.length>0;
+    if(agro){luasAgro+=luas;lahanAgro++;tanamanAgro+=sumPlants(ev);}else{luasTemb+=luas;lahanTemb++;}
+    if(planted){
+      luasTertanam+=luas;if(agro)tanamAgro+=luas;else tanamTemb+=luas;
+      const extra=ev.filter(e=>+e.d!==+ev[0].d);
+      if(extra.length){if(agro){addPetakAgro++;addTanAgro+=sumPlants(extra);}else addPetakTemb++;}
+    }
+    const pd=pupukDates(r.id,end);
+    if(pd.length){
+      if(agro){pupukAgro+=luas;petakPupukAgro++;aplikasiAgro+=pd.length;}else{pupukTemb+=luas;petakPupukTemb++;aplikasiTemb+=pd.length;}
+      if(planted){if(agro)bothAgro+=luas;else bothTemb+=luas;}
+    }
     const p=str(r.petani).toLowerCase(),g=str(r.jk).toLowerCase();
     if(!p)return;
-    if(g.startsWith('laki')){laki.add(p);petaniSet.add(p);}
-    else if(g.startsWith('perempuan')){perempuan.add(p);petaniSet.add(p);}
+    if(g.startsWith('laki'))laki.add(p);
+    else if(g.startsWith('perempuan'))perempuan.add(p);
+    else return;
+    petaniSet.add(p);
+    (agro?petaniAgro:petaniTemb).add(p);
   });
-  return{luasTotal,luasAgro,luasTemb,tanamanTotal,luasTertanam,petaniTotal:petaniSet.size,laki:laki.size,perempuan:perempuan.size};
+  return{luasTotal,luasAgro,luasTemb,tanamanAgro,addPetakAgro,addPetakTemb,addTanAgro,luasTertanam,tanamAgro,tanamTemb,pupukAgro,pupukTemb,bothAgro,bothTemb,lahanAgro,lahanTemb,petakPupukAgro,petakPupukTemb,aplikasiAgro,aplikasiTemb,
+    petaniTotal:petaniSet.size,laki:laki.size,perempuan:perempuan.size,petaniAgro:petaniAgro.size,petaniTemb:petaniTemb.size};
 }
 
+const pbOpen=new Set();
+function togglePb(el){const k=el.dataset.key;if(pbOpen.has(k))pbOpen.delete(k);else pbOpen.add(k);el.classList.toggle('open');}
 function renderStats(){
   const s=computeStats();
   const set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
+  const html=(id,v)=>{const el=document.getElementById(id);if(el)el.innerHTML=v;};
+  const pct=s.luasTotal>0?(s.luasTertanam/s.luasTotal*100).toLocaleString('id-ID',{maximumFractionDigits:1})+'% ':'';
   set('statLuasVal',fmt(s.luasTotal)+' ha');
-  set('statLuasSub',`${fmt(s.luasAgro)} ha agro, ${fmt(s.luasTemb)} ha restorasi`);
-  set('statTanamanVal',fmtInt(s.tanamanTotal));
-  set('statTanamanSub',fmt(s.luasTertanam)+' ha tertanam');
+  set('statLuasSub',`${fmt(s.luasTertanam)} ha ditanam/diintervensi${pct?` (${pct.trim()})`:''}`);
+  const pctOf=(a,b)=>b>0?(a/b*100).toLocaleString('id-ID',{maximumFractionDigits:1}):'0';
+  const bar=(key,lbl,reg,done,verb,both,detail)=>`<div class="pb-part${pbOpen.has(key)?' open':''}" data-key="${key}" onclick="togglePb(this)">
+    <div class="pb-head"><span class="ss-lbl">${lbl}<span class="pb-caret">▾</span></span><span class="pb-vals"><b>${fmt(done)}</b> / ${fmt(reg)} ha</span></div>
+    <div class="pb-track"><div class="pb-fill" style="width:${reg>0?done/reg*100:0}%"></div><div class="pb-fill pb-pupuk" style="width:${reg>0?both/reg*100:0}%"></div></div>
+    <div class="pb-sub">${pctOf(done,reg)}% ${verb}${both>0?` &middot; ${pctOf(both,reg)}% dipupuk`:''}</div>
+    <div class="pb-detail">${detail.map(([l,v])=>`<div><span>${l}</span><span>${v}</span></div>`).join('')}</div></div>`;
+  const detAgro=[['Petani',fmtInt(s.petaniAgro)],['Petak',fmtInt(s.lahanAgro)],['Tanaman',fmtInt(s.tanamanAgro)]];
+  if(s.addPetakAgro>0)detAgro.push(['Penambahan tanaman',`${fmtInt(s.addPetakAgro)} petak &middot; ${fmtInt(s.addTanAgro)} tanaman`]);
+  detAgro.push(['Ditanam & dipupuk',fmt(s.bothAgro)+' ha']);
+  if(s.pupukAgro>s.bothAgro)detAgro.push(['Dipupuk, belum ditanam',fmt(s.pupukAgro-s.bothAgro)+' ha']);
+  if(s.petakPupukAgro>0)detAgro.push(['Aplikasi pupuk',`${fmtInt(s.aplikasiAgro)} kali di ${fmtInt(s.petakPupukAgro)} petak`]);
+  const detTemb=[['Petani',fmtInt(s.petaniTemb)],['Petak',fmtInt(s.lahanTemb)]];
+  if(s.addPetakTemb>0)detTemb.push(['Penambahan tanaman',`${fmtInt(s.addPetakTemb)} petak`]);
+  if(s.pupukTemb>0)detTemb.push(['Dipupuk',fmt(s.pupukTemb)+' ha']);
+  if(s.petakPupukTemb>0)detTemb.push(['Aplikasi pupuk',`${fmtInt(s.aplikasiTemb)} kali di ${fmtInt(s.petakPupukTemb)} petak`]);
+  html('statParts',`<div class="pb-legend"><span><i class="pb-sw-pupuk"></i>Dipupuk</span><span><i class="pb-sw-fill"></i>Ditanam</span><span><i class="pb-sw-track"></i>Terdaftar</span></div>`
+    +bar('agro','Agroforestri',s.luasAgro,s.tanamAgro,'ditanam',s.bothAgro,detAgro)
+    +bar('temb','Restorasi',s.luasTemb,s.tanamTemb,'diintervensi',s.bothTemb,detTemb));
   set('statPetaniVal',fmtInt(s.petaniTotal));
   set('statPetaniSub',`${fmtInt(s.laki)} laki-laki, ${fmtInt(s.perempuan)} perempuan`);
 }
@@ -442,11 +536,14 @@ function openDetail(id){
   rows.push(`<div class="detail-row"><span class="detail-row-lbl">Luas</span><span class="detail-row-val">${fmt(luas)} ha</span></div>`);
   const tglGabung=fmtDate(r.tglPartisipasi);
   if(tglGabung)rows.push(`<div class="detail-row"><span class="detail-row-lbl">Tanggal Bergabung Program</span><span class="detail-row-val">${tglGabung}</span></div>`);
-  const tglTanam=fmtDate(r.tglRealisasi);
-  if(tglTanam)rows.push(`<div class="detail-row"><span class="detail-row-lbl">Tanggal Penanaman</span><span class="detail-row-val">${tglTanam}</span></div>`);
-  if(r.jumlahTanaman>0)rows.push(`<div class="detail-row"><span class="detail-row-lbl">Jumlah Tanaman</span><span class="detail-row-val">${fmtInt(r.jumlahTanaman)} tanaman</span></div>`);
+  const days=tanamDays(r.plantEvents);
+  if(days.length)rows.push(`<div class="detail-row"><span class="detail-row-lbl">Tanggal Penanaman</span><span class="detail-row-val">${days.map(d=>d.toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'})).join('<br>')}</span></div>`);
+  if(days.length>1)rows.push(`<div class="detail-row"><span class="detail-row-lbl">Penambahan Tanaman</span><span class="detail-row-val">${fmtInt(days.length-1)} kali</span></div>`);
+  const jml=sumPlants(r.plantEvents);
+  if(jml>0)rows.push(`<div class="detail-row"><span class="detail-row-lbl">Jumlah Tanaman</span><span class="detail-row-val">${fmtInt(jml)} tanaman</span></div>`);
   document.getElementById('detailTabInfo').innerHTML=rows.join('');
   renderKomposisi(r);
+  renderMonitoring(r);
   switchDetailTab('info');
   const panel=document.getElementById('detailPanel');
   const wasOpen=panel.classList.contains('open');
@@ -471,7 +568,34 @@ function komposisiSectionHTML(title,list){
 }
 function renderKomposisi(r){
   const el=document.getElementById('detailTabKomposisi');if(!el)return;
-  el.innerHTML=komposisiSectionHTML('Tanaman Eksisting',r.existingPlants)+komposisiSectionHTML('Tanaman Ditanam Project',r.plantedPlants);
+  el.innerHTML=komposisiSectionHTML('Tanaman Eksisting',r.existingPlants)+komposisiSectionHTML('Tanaman Ditanam Project',plantTotals(r.plantEvents));
+}
+
+function renderMonitoring(r){
+  const el=document.getElementById('detailTabMonitoring');if(!el)return;
+  const list=monMap[monKey(r.id)]||[];
+  if(!list.length){el.innerHTML='<div class="detail-tab-empty-inner">Belum ada data monitoring.</div>';return;}
+  el.innerHTML=list.map(e=>{
+    const c=MON_CAT[e.cat]||{label:e.cat||'Kegiatan',color:'var(--text-2)'};
+    const tgl=e.date?e.date.toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'}):'—';
+    const total=e.plants.reduce((s,p)=>s+p.count,0);
+    const meta=[`Kategori ${esc(c.label)}`,e.program&&`Program ${esc(e.program)}`,e.pupuk.size&&`Pupuk: ${esc([...e.pupuk].join(', '))}`].filter(Boolean).join(' · ');
+    const plants=e.plants.map(p=>`<div class="komposisi-row"><span>${esc(p.name)}${p.grafted?'<span class="mon-tag">Grafted</span>':''}</span><span>${fmtInt(p.count)} tanaman</span></div>`).join('');
+    const notes=[...e.notes].map(n=>`<div class="mon-item-note">${esc(n)}</div>`).join('');
+    return`<details class="mon-log">
+      <summary>
+        <span class="mon-log-chev">▶</span>
+        <span class="mon-log-date">${tgl}</span>
+        <span class="mon-log-dot" style="background:${c.color}"></span>
+        <span class="mon-log-title">${esc(e.interv||c.label)}</span>
+        ${e.plants.length?`<span class="mon-log-qty">${fmtInt(total)} bibit</span>`:''}
+      </summary>
+      <div class="mon-log-body">
+        <div class="mon-item-meta">${meta}</div>
+        ${plants}${notes}
+      </div>
+    </details>`;
+  }).join('');
 }
 
 function renderMiniMap(id,st){
@@ -500,25 +624,18 @@ function closeDetail(){
 function renderPage(){
   document.getElementById('pageBody').innerHTML=`
     <div class="sec-title">Monitoring</div>
-    <div class="stat-pairs">
-      <div class="pair-row">
-        <div class="stat-card">
-          <div class="stat-lbl">Luasan</div>
-          <div class="stat-val" id="statLuasVal">— ha</div>
-          <div class="stat-sub" id="statLuasSub">—</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-lbl">Jumlah Tanaman</div>
-          <div class="stat-val" id="statTanamanVal">—</div>
-          <div class="stat-sub" id="statTanamanSub">—</div>
-        </div>
+    <div class="kpi-grid c3">
+      <div class="card split-card">
+        <div class="card-lbl">Luas Terdaftar</div>
+        <div class="card-val-lg" id="statLuasVal">— ha</div>
+        <div class="card-sub-pct" id="statLuasSub">—</div>
+        <div class="ss-div"></div>
+        <div class="ss-parts" id="statParts"></div>
       </div>
-      <div class="pair-row">
-        <div class="stat-card">
-          <div class="stat-lbl">Jumlah Petani</div>
-          <div class="stat-val" id="statPetaniVal">—</div>
-          <div class="stat-sub" id="statPetaniSub">—</div>
-        </div>
+      <div class="card">
+        <div class="card-lbl">Jumlah Petani</div>
+        <div class="card-val-lg" id="statPetaniVal">—</div>
+        <div class="card-sub-pct" id="statPetaniSub">—</div>
       </div>
     </div>
 
@@ -568,6 +685,7 @@ function renderPage(){
       <div class="explore-filters" id="statusFilters">
         <button type="button" class="fpill active" data-val="all" onclick="setStatusFilter('all')">Semua</button>
         <button type="button" class="fpill" data-val="ditanam" onclick="setStatusFilter('ditanam')">Penanaman</button>
+        <button type="button" class="fpill" data-val="tambah" onclick="setStatusFilter('tambah')">Penambahan Tanaman</button>
       </div>
     </div>
     <div class="filter-group">
@@ -618,7 +736,6 @@ function renderPage(){
   }else window.addEventListener('resize',fitExploreRow);
 }
 
-// Tinggi daftar: saat pencarian di batas atas, pencarian + filter + daftar muat satu layar
 function fitExploreRow(){
   const sc=document.querySelector('.page-scroll'),search=document.getElementById('searchInput'),row=document.getElementById('exploreRow');
   if(!sc||!search||!row)return;
@@ -630,8 +747,10 @@ function fitExploreRow(){
 (async function boot(){
   try{
     document.getElementById('heroDate').textContent=new Date().toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'});
-    const [csvTxt]=await Promise.all([getText(CSV_URL),loadGeoJSON()]);
+    const monTxt=getText(MON_CSV_URL).catch(e=>{console.warn('Gagal memuat data monitoring:',e);return'';});
+    const [csvTxt,monCsv]=await Promise.all([getText(CSV_URL),monTxt,loadGeoJSON()]);
     parseSheet(csvTxt);
+    if(monCsv){parseMonitoring(monCsv);parseTanam(monCsv);}
     setupFilterOptions();
     renderPage();
   }catch(err){

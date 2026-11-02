@@ -7,8 +7,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
-<link rel="icon" type="image/png" href="assets/icons/favicon.png?v=2">
-<link rel="stylesheet" href="assets/css/dashboard.css">
+<link rel="icon" type="image/png" href="../assets/icons/favicon.png?v=2">
+<link rel="stylesheet" href="../assets/css/dashboard.css">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;overflow:hidden;font-family:'Libre Franklin',system-ui,sans-serif;font-size:14px;color:var(--text);background:var(--bg)}
@@ -39,7 +39,7 @@ a.card-title::after{content:"";position:absolute;inset:0;border-radius:14px}
 
 <header class="site-navbar">
   <div class="site-navbar-brand">
-    <img src="assets/logo/Sanggala_color.png" alt="Logo Sanggala Corridor Project">
+    <img src="../assets/logo/Sanggala_color.png" alt="Logo Sanggala Corridor Project">
     <span>SANGGALA CORRIDOR PROJECT</span>
   </div>
   <nav class="site-navbar-menu">
@@ -72,7 +72,6 @@ a.card-title::after{content:"";position:absolute;inset:0;border-radius:14px}
 
 <script>
 'use strict';
-// Satu entri = satu dashboard; "sub" mengikuti menu samping halaman tersebut
 const SECTIONS=[
   {title:'Illegal Activities Monitoring',items:[
     {title:'Fire and Forest Patrol Protection',href:'patrol-summary.html',
@@ -103,7 +102,6 @@ const SECTIONS=[
   ]}
 ];
 
-// Entri hidden:true disembunyikan sementara dari daftar
 SECTIONS.forEach(s=>{s.items=s.items.filter(d=>!d.hidden);});
 
 const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));

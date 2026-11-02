@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>Nursery</title>
-<link rel="icon" type="image/png" href="assets/icons/favicon.png?v=2">
+<link rel="icon" type="image/png" href="../assets/icons/favicon.png?v=2">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,7 +12,7 @@
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --primary:#356760;--primary-md:#618273;--primary-lt:#B5BBA9;--primary-bg:#FFFAF3;
+  --primary:#356760;--primary-md:#618273;--primary-lt:#B5BBA9;--primary-bg:#f3f3f3;
   --dark:#3A342C;
   --bg:#FFFAF3;--surface:#fff;--border:#DCDACC;--border-lt:#EDE7D8;
   --text:#3A342C;--text-2:#6A665B;--text-3:#9C998C;
@@ -82,7 +82,7 @@ body{display:flex;flex-direction:column}
 
 <header class="site-navbar">
   <div class="site-navbar-brand">
-    <img src="assets/logo/Sanggala_color.png" alt="Logo Sanggala Corridor Project">
+    <img src="../assets/logo/Sanggala_color.png" alt="Logo Sanggala Corridor Project">
     <span>SANGGALA CORRIDOR PROJECT</span>
   </div>
   <nav class="site-navbar-menu">
@@ -157,7 +157,6 @@ function pickCI(raw,keys,...names){
 
 async function getText(u){const r=await fetch(u);if(!r.ok)throw Error(r.status+' '+u);return r.text();}
 
-// Stok nursery = snapshot tahap tertentu; Semai Biji, Grafting mentah, Mati & output tidak dihitung
 function classifyCategory(raw){
   const n=str(raw).toLowerCase().replace(/[^a-z]/g,'');
   if(!n)return'none';
@@ -181,7 +180,6 @@ function classifyCategory(raw){
   return'other';
 }
 
-// Tahap yang TIDAK dihitung sebagai stok nursery saat ini:
 const STOCK_EXCLUDED=new Set(['none','semai','grafting','mati','penanaman','penyulaman','support']);
 
 let totalSemai=0,jumlahDiNursery=0;

@@ -4,14 +4,15 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>Planting Summary</title>
-<link rel="icon" type="image/png" href="assets/icons/favicon.png?v=2">
+<link rel="icon" type="image/png" href="../assets/icons/favicon.png?v=2">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script src="../assets/js/sheet-utils.js"></script>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/dashboard.css">
+<link rel="stylesheet" href="../assets/css/dashboard.css">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;overflow:hidden;font-family:'Libre Franklin',system-ui,sans-serif;font-size:14px;color:var(--text);background:var(--bg)}
@@ -32,8 +33,8 @@ body{display:flex;flex-direction:column}
 .card-val-row .card-val-lg{white-space:nowrap}
 .card-tgt{font-size:10.5px;font-weight:700;color:var(--primary-md);text-align:right;line-height:1.25}
 .card-split{display:flex;justify-content:space-between;gap:8px}
-.pair-row .card{min-height:122px}
-.pair-row .card-val-row,.pair-row .card-lbl+.card-val-lg{min-height:27px}
+.pair-row .card{min-height:132px}
+.pair-row .card-val-row,.pair-row .card-lbl+.card-val-lg{min-height:33px}
 .pair-row .card-lbl+.card-val-lg{display:flex;align-items:flex-end}
 .pair-row .card-val-lg+.card-sub-pct,.pair-row .card-val-row+.card-sub-pct{margin-top:10px}
 .card-split span:last-child{white-space:nowrap}
@@ -66,7 +67,7 @@ body{display:flex;flex-direction:column}
 
 <header class="site-navbar">
   <div class="site-navbar-brand">
-    <img src="assets/logo/Sanggala_color.png" alt="Logo Sanggala Corridor Project">
+    <img src="../assets/logo/Sanggala_color.png" alt="Logo Sanggala Corridor Project">
     <span>SANGGALA CORRIDOR PROJECT</span>
   </div>
   <nav class="site-navbar-menu">
@@ -129,24 +130,18 @@ const CSV_URL=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=ou
 const TARGET_URL=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(TARGET_NAME)}`;
 
 const str=v=>(v??'').toString().trim();
-const num=v=>parseFloat(str(v))||0;
+const num=v=>sheetNum(v);
 const fmt=v=>(+v||0).toLocaleString('id-ID',{minimumFractionDigits:2,maximumFractionDigits:2});
 const fmtInt=v=>(+v||0).toLocaleString('id-ID',{minimumFractionDigits:0,maximumFractionDigits:0});
 const esc=x=>str(x).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
-function parseDate(s){
-  if(!s)return null;const c=str(s).trim();
-  const m=c.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
-  if(m)return new Date(+m[3],+m[1]-1,+m[2]);
-  const d=new Date(c);return isNaN(d)?null:d;
-}
+function parseDate(s){return sheetDate(s,'mdy');}
 function pickCI(raw,keys,...names){
   const norm=s=>s.toString().trim().toLowerCase();
   const wanted=names.map(norm);
   for(const kk of keys){if(wanted.includes(norm(kk)))return raw[kk];}
   return undefined;
 }
-// Baca kolom lewat nama header; posisi kolom hanya cadangan
 function colV(raw,keys,names,idx){
   const v=pickCI(raw,keys,...names);
   if(v!==undefined)return v;
@@ -162,10 +157,8 @@ function resolveProgram(aReg,aBPO,tReg,tMTL,tipe){
 let sheetMap={},targetData={},currentYear='all',currentQuarter='all',years=[];
 const QUARTERS=['1','2','3','4'];
 const MN=['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
-// 'yq' = Tahun + Quarter; 'ytd'/'mtd'/'week' mengabaikan keduanya
 let periodMode='yq',weekYear=new Date().getFullYear(),weekMonth=new Date().getMonth(),weekIdx=null;
 
-// Minggu = Sabtu–Jumat
 function getWeeksInMonth(yr,mo){
   let sat=new Date(yr,mo,1);sat.setDate(sat.getDate()-((sat.getDay()+1)%7));
   const last=new Date(yr,mo+1,0),weeks=[];let n=1;
@@ -187,7 +180,6 @@ async function getText(u){const r=await fetch(u);if(!r.ok)throw Error(r.status+'
 
 function parseSheet(csv){
   const {data}=Papa.parse(csv,{header:true,skipEmptyLines:true,transformHeader:h=>h.trim()});
-  // Header "P-<jenis>" = tanaman program, "E-<jenis>" = tanaman eksisting
   const plantCols=[],existCols=[];
   (data.length?Object.keys(data[0]):[]).forEach(h=>{
     let m=h.match(/^P-\s*(.+)$/i);
@@ -207,18 +199,28 @@ function parseSheet(csv){
     const k=i=>keys[i]?str(raw[keys[i]]):'';
     const luasAgro=num(colV(raw,keys,['luas_agro','Luas_Agro'],45));
     const luasTemb=num(colV(raw,keys,['luas_temb','Luas_Temb'],46));
-    const jumlahTanaman=num(colV(raw,keys,['Total_Tanaman','Total Tanaman','Jumlah_Tanaman'],49));
     const luasENL=num(pickCI(raw,keys,'ENL'));
     const luasENP=num(pickCI(raw,keys,'ENP'));
-    const plantedPlants=plantCols.map(c=>({name:c.name,count:num(raw[c.header])})).filter(p=>p.count>0);
+    const tglTanam=parseDate(tglRealisasi);
+    const plantEvents=tglTanam?plantCols.map(c=>({d:tglTanam,name:c.name,n:num(raw[c.header])})).filter(e=>e.n>0):[];
     const existingPlants=existCols.map(c=>({name:c.name,count:num(raw[c.header])})).filter(p=>p.count>0);
     const prog=resolveProgram(aReg,aBPO,tReg,tMTL,tipe);
     if(!prog&&luasENL<=0&&luasENP<=0)return;
     const _luasAgro=luasAgro>0?luasAgro:aReg+aBPO;
     const _luasTemb=luasTemb>0?luasTemb:tReg+tMTL;
-    sheetMap[id]={id,kth,petani,jk,tglPartisipasi,tglRealisasi,aReg,aBPO,tReg,tMTL,luasAgro:_luasAgro,luasTemb:_luasTemb,luasENL,luasENP,prog,jumlahTanaman,plantedPlants,existingPlants};
+    sheetMap[id]={id,kth,petani,jk,tglPartisipasi,tglRealisasi:tglTanam,aReg,aBPO,tReg,tMTL,luasAgro:_luasAgro,luasTemb:_luasTemb,luasENL,luasENP,prog,plantEvents,existingPlants};
   });
 }
+function parseLog(csv){
+  const log=parseActivityLog(csv);
+  if(!log.hasTanam)return;
+  Object.values(sheetMap).forEach(r=>{
+    r.plantEvents=log.tanam[r.id.toUpperCase()]||[];
+    r.tglRealisasi=r.plantEvents.length?r.plantEvents[0].d:null;
+  });
+}
+const plantsIn=r=>r.plantEvents.reduce((a,e)=>matchesDateFilter(e.d)?a+e.n:a,0);
+const plantTotals=r=>Object.entries(r.plantEvents.reduce((o,e)=>(o[e.name]=(o[e.name]||0)+e.n,o),{})).map(([name,count])=>({name,count})).filter(p=>p.count>0);
 
 function parseTargetSheet(csv){
   const {data}=Papa.parse(csv,{header:false,skipEmptyLines:true});
@@ -239,7 +241,6 @@ function parseTargetSheet(csv){
     if(isT){td.temb_utama+=utama;td.temb_total+=total;}
     if(isENP){td.enp_utama+=utama;td.enp_total+=total;}
     if(isENL){td.enl_utama+=utama;td.enl_total+=total;}
-    // Kolom D–O = target per bulan (sama dengan planting.html)
     for(let m=0;m<12;m++){
       const v=parseFloat(str(row[3+m]))||0;
       if(isA)td.monthly[m].agro+=v;
@@ -268,7 +269,6 @@ function parseNursery(csv){
     });
   });
 }
-// Akhir periode untuk angka stok; null = semua data
 function periodEndDate(){
   const now=new Date();
   if(periodMode==='week'){const wk=getSelectedWeek();if(wk){const e=new Date(wk.fri);e.setHours(23,59,59,999);return e<now?e:null;}}
@@ -289,7 +289,6 @@ function matchesDateFilter(d){
 }
 function computeNursery(){
   if(!nurseryRows)return null;
-  // Stok = Σ per jenis Pembesaran (E) + BST (H), akumulasi s/d akhir periode
   const end=periodEndDate();
   const upTo=nurseryRows.filter(r=>!end||(r.date&&r.date<=end));
   const by={};
@@ -301,7 +300,6 @@ function computeNursery(){
     bst+=Math.max(0,g(NCAT.bst)-g(NCAT.matiBst)-g(NCAT.tanam)-g(NCAT.sulam)-g(NCAT.support));
   });
   const last=upTo.reduce((a,r)=>r.date&&(!a||r.date>a)?r.date:a,null);
-  // Distribusi = Penanaman + Penyulaman + Support di dalam periode
   const dist={tanam:0,sulam:0,support:0};
   nurseryRows.forEach(r=>{
     if(!matchesDateFilter(r.date))return;
@@ -346,23 +344,34 @@ function computeTanamanTotal(){
   let total=0,agro=0,temb=0;
   Object.values(sheetMap).forEach(r=>{
     if(!matchesFilter(r,'tglRealisasi'))return;
-    total+=r.jumlahTanaman;
-    if(r.prog?.startsWith('Agro'))agro+=r.jumlahTanaman;
-    else if(r.prog?.startsWith('Temb'))temb+=r.jumlahTanaman;
+    const n=plantsIn(r);
+    total+=n;
+    if(r.prog?.startsWith('Agro'))agro+=n;
+    else if(r.prog?.startsWith('Temb'))temb+=n;
   });
   return{total,agro,temb};
 }
 
-// Sudah ditanam = punya Tgl_Realisasi; jumlah tanaman bukan syarat
 function computePlanting(){
-  let agro=0,temb=0;const speciesMap={};
+  let agro=0,temb=0,lahanA=0,lahanT=0,addA=0,addT=0,addTanA=0,addLuasA=0,addLuasT=0;const speciesMap={},petaniA=new Set(),petaniT=new Set();
   Object.values(sheetMap).forEach(r=>{
-    if(!matchesFilter(r,'tglRealisasi'))return;
+    const isAgro=r.prog?.startsWith('Agro'),isTemb=r.prog?.startsWith('Temb');
+    r.plantEvents.forEach(e=>{if(e.n&&matchesDateFilter(e.d))speciesMap[e.name]=(speciesMap[e.name]||0)+e.n;});
+    if(!matchesFilter(r,'tglRealisasi')){
+      if(r.tglRealisasi&&!matchesFilter(r,'tglPartisipasi')&&r.plantEvents.some(e=>matchesDateFilter(e.d))){
+        if(isAgro){addA++;addTanA+=plantsIn(r);addLuasA+=r.luasAgro;}
+        else if(isTemb){addT++;addLuasT+=r.luasTemb;}
+      }
+      return;
+    }
     agro+=r.luasAgro;temb+=r.luasTemb;
-    r.plantedPlants.forEach(p=>{speciesMap[p.name]=(speciesMap[p.name]||0)+p.count;});
+    if(isAgro||isTemb){
+      if(isAgro)lahanA++;else lahanT++;
+      if(r.petani&&str(r.jk).trim())(isAgro?petaniA:petaniT).add(r.petani.toLowerCase());
+    }
   });
   const species=Object.entries(speciesMap).sort((a,b)=>b[1]-a[1]).map(([name])=>name);
-  return{luas:agro+temb,agro,temb,species};
+  return{luas:agro+temb,agro,temb,species,lahanA,lahanT,addA,addT,addTanA,addLuasA,addLuasT,petaniA:petaniA.size,petaniT:petaniT.size};
 }
 function joinID(list){
   return list.length<=1?list.join(''):list.slice(0,-1).join(', ')+(list.length>2?',':'')+' dan '+list[list.length-1];
@@ -386,7 +395,6 @@ function computeTarget(){
   const td=targetData[+currentYear];
   return td?{agro:td.agro_total??null,temb:td.temb_total??null}:{agro:null,temb:null};
 }
-// Target luas per program sesuai periode filter: tahunan, quarter (Σ 3 bulan), atau bulanan
 const TGT_KEYS=['agro','temb'];
 function periodTarget(){
   const pick=(td,suffix,label)=>{
@@ -413,7 +421,6 @@ function periodTarget(){
   const q=+currentQuarter;
   return sumMonths(td,[3*q-3,3*q-2,3*q-1],`target Q${q}`);
 }
-// Luas pembanding target; mode mingguan memakai akumulasi bulan s/d minggu terpilih (seperti planting.html)
 function targetRealAreas(areas){
   if(periodMode!=='week')return areas;
   const wk=getSelectedWeek();if(!wk)return areas;
@@ -441,7 +448,6 @@ function pctOfTarget(val,target,label){
 }
 function pctText(val,target){
   if(target===null||target===undefined||target<=0)return'';
-  // Filter quarter tetap dibandingkan ke target tahunan
   const partial=periodMode==='yq'?currentQuarter!=='all':periodMode!=='ytd';
   return(val/target*100).toFixed(1)+(partial?'% dari target tahunan':'% dari target');
 }
@@ -450,7 +456,7 @@ function computePesertaTotal(){
   const all=new Set(),agro=new Set(),temb=new Set();
   Object.values(sheetMap).forEach(r=>{
     if(!matchesFilter(r,'tglPartisipasi'))return;
-    if(!r.petani||!str(r.jk).trim())return; // jenis kelamin kosong -> tidak dihitung anggota
+    if(!r.petani||!str(r.jk).trim())return;
     const p=r.petani.toLowerCase();
     all.add(p);
     if(r.luasAgro>0)agro.add(p);
@@ -536,6 +542,13 @@ function nurseryHtml(){
     </div>`;
 }
 
+const plantTip=(luas,petak,tan,addLuas,addPetak,addTan)=>{
+  const v=(l,p,t)=>`${fmt(l)} ha / ${fmtInt(p)} petak${t===null?'':` / ${fmtInt(t)} tanaman`}`;
+  return`<div class="ss-tip"><div class="ss-tip-head"><strong>Rincian penanaman</strong></div>
+    <div class="ss-tip-row"><span>Penanaman baru</span><b>${v(luas,petak,tan)}</b></div>
+    <div class="ss-tip-row"><span>Penambahan tanaman</span><b>${v(addLuas,addPetak,addTan)}</b></div>
+    <div class="ss-tip-note">Penambahan tanaman dilakukan pada ${fmt(addLuas)} ha lahan yang sudah ditanam sebelumnya: luas dan tanamannya tidak dihitung sebagai capaian.</div></div>`;
+};
 function render(){
   const yq=periodMode==='yq';
   const areas=computeAreas();
@@ -555,9 +568,8 @@ function render(){
     :'(target belum tersedia)';
   const note2=`Luasan program agroforestri mencapai ${fmt(areas.agro)} ha, ${tgtPhrase(areas.agro,tgt.agro)}. Sedangkan program reforestasi mencapai ${fmt(areas.temb)} ha, ${tgtPhrase(areas.temb,tgt.temb)}.`;
   const plant=computePlanting();
-  const plantPct=totalHa>0?(plant.luas/totalHa*100).toLocaleString('id-ID',{maximumFractionDigits:1}):'0';
   const dominan=plant.species.slice(0,3);
-  const note3=`Total ${fmt(plant.luas)} ha lahan sudah dilakukan penanaman, mencakup ${plantPct}% dari total luas lahan terdaftar. Sekitar ${fmtInt(tanaman.total)} pohon telah ditanam`
+  const note3=`Total ${fmt(plant.luas)} ha lahan sudah dilakukan penanaman. Sekitar ${fmtInt(tanaman.agro)} pohon telah ditanam`
     +(plant.species.length
       ?`, yang terdiri dari ${fmtInt(plant.species.length)} jenis tanaman, dengan jenis ${esc(joinID(dominan))} sebagai jenis tanaman dominan.`
       :'.');
@@ -620,16 +632,14 @@ function render(){
 
     <div class="two-col-row">
       <div class="col">
-        <div class="pair-row">
-          <div class="card">
-            <div class="card-lbl">Luas Sudah Ditanam</div>
-            <div class="card-val-row"><div class="card-val-lg">${fmt(plant.luas)} ha</div><span class="card-tgt">${plantPct}% dari terdaftar</span></div>
-            ${subLines(`${fmt(plant.agro)} ha agroforestri`,`${fmt(plant.temb)} ha reforestasi`)}
-          </div>
-          <div class="card">
-            <div class="card-lbl">Jumlah Tanaman</div>
-            <div class="card-val-lg">${fmtInt(tanaman.total)}</div>
-            ${subLines(`${fmtInt(tanaman.agro)} agroforestri`,`${fmtInt(tanaman.temb)} reforestasi`)}
+        <div class="card split-card">
+          <div class="card-lbl">ARR Implementation</div>
+          <div class="card-val-lg">${fmt(plant.luas)} ha</div>
+          <div class="card-sub-pct">${fmtInt(tanaman.agro)} tanaman</div>
+          <div class="ss-div"></div>
+          <div class="ss-parts">
+            <div class="ss-part${plant.addA?' ss-has-tip" tabindex="0':''}"><div class="ss-lbl">Area Planted</div><div class="ss-row"><span class="ss-val">${fmt(plant.agro)} ha</span><span class="ss-note"><span class="ss-sub">${fmtInt(plant.petaniA)} petani &middot; ${fmtInt(plant.lahanA)} petak</span><br>${fmtInt(tanaman.agro)} tanaman</span></div>${plant.addA?plantTip(plant.agro,plant.lahanA,tanaman.agro,plant.addLuasA,plant.addA,plant.addTanA):''}</div>
+            <div class="ss-part${plant.addT?' ss-has-tip" tabindex="0':''}"><div class="ss-lbl">Area Restored</div><div class="ss-row"><span class="ss-val">${fmt(plant.temb)} ha</span><span class="ss-note ss-sub">${fmtInt(plant.petaniT)} petani &middot; ${fmtInt(plant.lahanT)} petak</span></div>${plant.addT?plantTip(plant.temb,plant.lahanT,null,plant.addLuasT,plant.addT,null):''}</div>
           </div>
         </div>
         <p class="page-note">${note3}</p>
@@ -666,8 +676,8 @@ async function initSebaran(){
   L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',{maxZoom:19}).addTo(sebaranMap);
   sebaranMap.setView([0,110],8);
   const [agroJ,cmiJ]=await Promise.all([
-    getJSON('assets/json/agro.json'+CACHE_BUST).catch(e=>{console.warn('Gagal memuat agro.json',e);return null;}),
-    getJSON('assets/json/CMI.json'+CACHE_BUST).catch(e=>{console.warn('Gagal memuat CMI.json',e);return null;})
+    getJSON('../assets/json/agro.json'+CACHE_BUST).catch(e=>{console.warn('Gagal memuat agro.json',e);return null;}),
+    getJSON('../assets/json/CMI.json'+CACHE_BUST).catch(e=>{console.warn('Gagal memuat CMI.json',e);return null;})
   ]);
   if(cmiJ){
     const cmi=L.geoJSON(cmiJ,{interactive:false,style:()=>({color:'#334155',weight:2,fillOpacity:0,opacity:.9})}).addTo(sebaranMap);
@@ -686,7 +696,6 @@ async function initSebaran(){
   updateSebaran(true);
 }
 
-// Lahan mengikuti filter (Tgl_Partisipasi)
 function updateSebaran(fit){
   if(!lgLahan)return;
   lgLahan.clearLayers();
@@ -725,22 +734,24 @@ function selectLahan(id){
       <div><div class="ld-lbl">ID Lahan</div><div class="ld-val">${esc(r.id)}</div></div>
       <div><div class="ld-lbl">Program</div><div class="ld-val">${pi.label}</div></div>
       <div><div class="ld-lbl">Luas</div><div class="ld-val">${fmt(lahanLuas(r))} ha</div></div>
-      <div><div class="ld-lbl">Total Tanaman</div><div class="ld-val">${fmtInt(r.existingPlants.reduce((s,p)=>s+p.count,0)+r.plantedPlants.reduce((s,p)=>s+p.count,0))}</div></div>
+      <div><div class="ld-lbl">Total Tanaman</div><div class="ld-val">${fmtInt(r.existingPlants.reduce((s,p)=>s+p.count,0)+r.plantEvents.reduce((s,e)=>s+e.n,0))}</div></div>
     </div>
     ${plantListHtml('Tanaman Eksisting',r.existingPlants)}
-    ${plantListHtml('Tanaman Program',r.plantedPlants)}`;
+    ${plantListHtml('Tanaman Program',plantTotals(r))}`;
 }
 
 
 (async function boot(){
   try{
     document.getElementById('heroDate').textContent=new Date().toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'});
-    const [csvTxt,tgtTxt,nurTxt]=await Promise.all([
+    const [csvTxt,tgtTxt,nurTxt,logTxt]=await Promise.all([
       getText(CSV_URL),
       getText(TARGET_URL).catch(()=>''),
-      getText(NURSERY_URL).catch(e=>{console.warn('Gagal memuat data nursery',e);return'';})
+      getText(NURSERY_URL).catch(e=>{console.warn('Gagal memuat data nursery',e);return'';}),
+      getText(ACTIVITY_LOG_URL).catch(()=>'')
     ]);
     parseSheet(csvTxt);
+    parseLog(logTxt);
     if(tgtTxt)parseTargetSheet(tgtTxt);
     if(nurTxt)parseNursery(nurTxt);
     const yrsData=new Set();
