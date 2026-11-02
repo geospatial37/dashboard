@@ -1,4 +1,4 @@
 # Sanggala Corridor Project - Dashboard
 
 
-🔗 **Live site:** https://gis-carbonx.github.io/dashboard/
+🔗 **Live site:** https://geospatial37.github.io/dashboard/
