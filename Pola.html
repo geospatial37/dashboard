@@ -641,7 +641,7 @@ function progLabel(p){const t=str(p).toLowerCase();
 const str=v=>(v??'').toString().trim();
 async function loadAOI(){
   const get=async u=>{const r=await fetch(u);if(!r.ok)throw new Error(`${r.status} ${u}`);return r.json();};
-  const [cmi,agro]=await Promise.all([get('../assets/json/CMI.json'),get('../assets/json/agro.json')]);
+  const [cmi,agro]=await Promise.all([get('assets/json/CMI.json'),get('assets/json/agro.json')]);
   S.aoi.cmi=cmi.features.map(f=>({name:str(f.properties.Name),polys:polysFromGeoJSON(f).polys}));
   S.aoi.plots=agro.features.filter(f=>str(f.properties.id_lahan)&&!AOI_SKIP.test(str(f.properties.Program))).map(f=>{const p=f.properties;
     return{id:str(p.id_lahan),nama:str(p.Nama),prog:progLabel(p.Program),luas:+p.Luas||0,polys:polysFromGeoJSON(f).polys};})

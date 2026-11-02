@@ -4,15 +4,15 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>Planting Summary</title>
-<link rel="icon" type="image/png" href="../assets/icons/favicon.png?v=2">
+<link rel="icon" type="image/png" href="assets/icons/favicon.png?v=2">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-<script src="../assets/js/sheet-utils.js"></script>
+<script src="assets/js/sheet-utils.js"></script>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../assets/css/dashboard.css">
+<link rel="stylesheet" href="assets/css/dashboard.css">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;overflow:hidden;font-family:'Libre Franklin',system-ui,sans-serif;font-size:14px;color:var(--text);background:var(--bg)}
@@ -67,7 +67,7 @@ body{display:flex;flex-direction:column}
 
 <header class="site-navbar">
   <div class="site-navbar-brand">
-    <img src="../assets/logo/Sanggala_color.png" alt="Logo Sanggala Corridor Project">
+    <img src="assets/logo/Sanggala_color.png" alt="Logo Sanggala Corridor Project">
     <span>SANGGALA CORRIDOR PROJECT</span>
   </div>
   <nav class="site-navbar-menu">
@@ -676,8 +676,8 @@ async function initSebaran(){
   L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',{maxZoom:19}).addTo(sebaranMap);
   sebaranMap.setView([0,110],8);
   const [agroJ,cmiJ]=await Promise.all([
-    getJSON('../assets/json/agro.json'+CACHE_BUST).catch(e=>{console.warn('Gagal memuat agro.json',e);return null;}),
-    getJSON('../assets/json/CMI.json'+CACHE_BUST).catch(e=>{console.warn('Gagal memuat CMI.json',e);return null;})
+    getJSON('assets/json/agro.json'+CACHE_BUST).catch(e=>{console.warn('Gagal memuat agro.json',e);return null;}),
+    getJSON('assets/json/CMI.json'+CACHE_BUST).catch(e=>{console.warn('Gagal memuat CMI.json',e);return null;})
   ]);
   if(cmiJ){
     const cmi=L.geoJSON(cmiJ,{interactive:false,style:()=>({color:'#334155',weight:2,fillOpacity:0,opacity:.9})}).addTo(sebaranMap);
