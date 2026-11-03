@@ -70,7 +70,8 @@
     .comp-tip span:last-child{font-weight:600;color:#3A342C}
     @media (max-width:600px){.comp-row{grid-template-columns:110px minmax(0,1fr)}}
     .map-legend{position:absolute;left:10px;bottom:10px;z-index:500;background:rgba(255,255,255,.92);border-radius:10px;padding:7px 10px;font-size:10.5px;color:#3A342C;box-shadow:0 1px 4px rgba(0,0,0,.15);display:flex;flex-direction:column;gap:4px}
-    .map-legend span{display:flex;align-items:center;gap:6px}
+    .map-legend span{display:flex;align-items:center;gap:6px;transition:opacity .15s}
+    .map-legend span.off{opacity:.35}
     .lg-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;border:1.5px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.25)}
     .lg-line{width:16px;border-top:2px solid #334155;flex-shrink:0}
 
@@ -198,7 +199,7 @@
         <a class="side-item" href="monitoring-fire-event.html" title="Fire Alert" aria-label="Fire Alert"><svg viewBox="0 0 24 24"><path d="M12 3c.4 3-2.6 4.6-2.6 7.6 0 .9.3 1.7.8 2.3C8 12.6 6.5 10.9 6.5 9 4.9 10.6 4 12.7 4 14.9 4 18.8 7.6 21 12 21s8-2.2 8-6.1C20 9.6 15.4 6.2 12 3Z"/><path d="M12 21c-1.8 0-3-1.1-3-2.7 0-1.9 1.6-2.8 3-4.8 1.4 2 3 2.9 3 4.8 0 1.6-1.2 2.7-3 2.7Z"/></svg></a>
         <a class="side-item" href="pantauan-titik-api.html" title="Perbandingan History Data Titik Api" aria-label="Perbandingan History Data Titik Api"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 5-6"/><path d="M15 8h4v4"/></svg></a>
         <a class="side-item" href="satellite-tracker.html" title="Satellite Tracker" aria-label="Satellite Tracker"><svg viewBox="0 0 24 24"><path d="M13 7 9 3 5 7l4 4"/><path d="m17 11 4 4-4 4-4-4"/><path d="m8 12 4 4 6-6-4-4Z"/><path d="m16 8 3-3"/><path d="M9 21a6 6 0 0 0-6-6"/></svg></a>
-        <a class="side-item" href="land-clearing-alert.html" title="Land Clearing Alert" aria-label="Land Clearing Alert"><svg viewBox="0 0 24 24"><path d="M9 3 4.5 9.5h2.3L3.5 14.5h11L11.2 9.5h2.3Z"/><path d="M9 14.5V20"/><path d="M15.5 20h5"/><path d="M16.5 20v-3h3v3"/></svg></a>
+        <a class="side-item" href="dist-alert.html" title="Land Clearing Alert" aria-label="Land Clearing Alert"><svg viewBox="0 0 24 24"><path d="M9 3 4.5 9.5h2.3L3.5 14.5h11L11.2 9.5h2.3Z"/><path d="M9 14.5V20"/><path d="M15.5 20h5"/><path d="M16.5 20v-3h3v3"/></svg></a>
         <a class="side-item" href="community-fire-management.html" title="Community Fire Management" aria-label="Community Fire Management"><svg viewBox="0 0 24 24"><circle cx="9.2" cy="8.3" r="2.9"/><path d="M3.5 19.5c0-3.1 2.5-5.7 5.7-5.7s5.7 2.6 5.7 5.7"/><circle cx="16.8" cy="9" r="2.2"/><path d="M15.4 13.9c2.4.5 4.1 2.6 4.1 5.1"/></svg></a>
         <a class="side-item" href="weather.html" title="Weather" aria-label="Weather"><svg viewBox="0 0 24 24"><path d="M7 15.5a4 4 0 0 1-.5-8A5.5 5.5 0 0 1 17 8.5a3.5 3.5 0 0 1 .5 7Z"/><path d="M8.5 18.5 7.5 21"/><path d="M12.5 18.5l-1 2.5"/><path d="M16.5 18.5l-1 2.5"/></svg></a>      </nav>
       <div class="page-body-inner">
@@ -910,6 +911,17 @@ function hidePanel(ctx){
   panel.classList.remove('visible');
   document.querySelectorAll(ctx.cardSel).forEach(c=>c.classList.remove('active'));
   selectMarker(ctx,null);
+  setMapFilter(ctx,null);
+}
+
+function setMapFilter(ctx,cat){
+  ctx.filter=cat;
+  ctx.markers.forEach(m=>{
+    const show=!cat||m.options.category===cat;
+    if(show&&!ctx.layer.hasLayer(m))m.addTo(ctx.layer);
+    else if(!show&&ctx.layer.hasLayer(m))ctx.layer.removeLayer(m);
+  });
+  if(ctx.legend)ctx.legend.querySelectorAll('[data-cat]').forEach(s=>s.classList.toggle('off',!!cat&&s.dataset.cat!==cat));
 }
 
 function resetDetailTables(){
@@ -1041,9 +1053,11 @@ function setupDetailTableClicks(){
   [illegalCtx,bioCtx,fireCtx].forEach(ctx=>{
     document.querySelectorAll(ctx.cardSel).forEach(card=>{
       card.addEventListener('click',()=>{
+        const cat=card.dataset.category;
+        if(ctx.filter===cat){hidePanel(ctx);return;}
         document.querySelectorAll(ctx.cardSel).forEach(c=>c.classList.remove('active'));
         card.classList.add('active');
-        const cat=card.dataset.category;
+        setMapFilter(ctx,cat);
         const rows=currentFilteredSubmission.filter(r=>ctx.catOf(r)===cat);
         renderDetailTable(ctx,rows,ctx.labels[cat]);
       });
@@ -1054,7 +1068,7 @@ function setupDetailTableClicks(){
 let illegalCtx=null,bioCtx=null,fireCtx=null;
 
 function createFindingMap(cfg){
-  const ctx={...cfg,map:null,layer:null,ready:false,pending:null,markers:new Map(),selected:null};
+  const ctx={...cfg,map:null,layer:null,ready:false,pending:null,markers:new Map(),selected:null,filter:null,legend:null};
   ctx.map=L.map(cfg.mapId,{zoomControl:true,attributionControl:false,scrollWheelZoom:true});
   L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',{maxZoom:19}).addTo(ctx.map);
   ctx.map.setView([0.8,110.3],11);
@@ -1062,9 +1076,10 @@ function createFindingMap(cfg){
 
   const legend=document.createElement('div');
   legend.className='map-legend';
-  legend.innerHTML=Object.keys(cfg.labels).map(k=>`<span><i class="lg-dot" style="background:${cfg.colors[k]}"></i>${esc(cfg.labels[k])}</span>`).join('')
+  legend.innerHTML=Object.keys(cfg.labels).map(k=>`<span data-cat="${k}"><i class="lg-dot" style="background:${cfg.colors[k]}"></i>${esc(cfg.labels[k])}</span>`).join('')
     +'<span><i class="lg-line"></i>CMI Boundary</span>';
   document.getElementById(cfg.mapId).parentElement.appendChild(legend);
+  ctx.legend=legend;
 
   const finish=()=>{
     ctx.layer.addTo(ctx.map);
@@ -1109,12 +1124,13 @@ function renderMapPoints(ctx,points){
   points.forEach(p=>{
     const m=L.circleMarker([p.lat,p.lon],{...markerStyle(ctx,p.category,false),category:p.category});
     m.on('click',()=>{
-      document.querySelectorAll(ctx.cardSel).forEach(c=>c.classList.remove('active'));
+      if(!ctx.filter)document.querySelectorAll(ctx.cardSel).forEach(c=>c.classList.remove('active'));
       showFindingDetail(ctx,p.row,null);
     });
     ctx.markers.set(p.row,m);
     m.addTo(ctx.layer);
   });
+  setMapFilter(ctx,ctx.filter);
 }
 
 loadAll();

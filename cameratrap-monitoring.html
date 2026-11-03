@@ -485,7 +485,7 @@ function switchBasemap(id){
 const map=L.map('map',{center:[0.8,110.325],zoom:13,zoomControl:false,attributionControl:false});
 basemaps['esri_imagery'].addTo(map);
 
-const lulc=L.tileLayer('assets/tiles/lulc_23/{z}/{x}/{y}.png',{opacity:1});
+const lulc=L.tileLayer('./assets/tiles/lulc_23/{z}/{x}/{y}.png',{opacity:1});
 let boundaryLayer,mapBounds;
 const ctGridLayer =L.layerGroup().addTo(map);
 const ctPointLayer=L.layerGroup().addTo(map);
@@ -506,7 +506,7 @@ document.addEventListener('click',e=>{if(filterPanel.classList.contains('open')&
 
 const CT_SHEET_ID='1Zkm82R3ct1HY1ov_HL35M9qEJudKPCkf0wGSNGxwdQ4';
 const CT_SHEET_URL=`https://docs.google.com/spreadsheets/d/${CT_SHEET_ID}/export?format=csv&gid=414415821`;
-const CT_GRID_URL='assets/json/Grid.json';
+const CT_GRID_URL='./assets/json/Grid.json';
 let ctData=[],ctGridGeo=null,ctLoaded=false;
 const CTF={batch:'',site:'',kelas:'',spesies:'',iucn:''};
 let allCtBatches=[],allCtSites=[],allCtClasses=[],allCtSpecies=[],allCtIucns=[];
