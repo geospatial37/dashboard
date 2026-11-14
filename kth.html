@@ -96,7 +96,7 @@ body{display:flex;flex-direction:column}
     <div class="hero-inner">
       <div>
         <div class="hero-title">KTH</div>
-        <div class="hero-date" id="heroDate">Memuat tanggal...</div>
+        <div class="hero-date" id="heroDate">Loading data...</div>
       </div>
     </div>
   </div>
@@ -112,7 +112,7 @@ body{display:flex;flex-direction:column}
           <a class="side-item active" href="kth.html" title="KTH" aria-label="KTH"><svg viewBox="0 0 24 24"><circle cx="9.2" cy="8.3" r="2.9"/><path d="M3.5 19.5c0-3.1 2.5-5.7 5.7-5.7s5.7 2.6 5.7 5.7"/><circle cx="16.8" cy="9" r="2.2"/><path d="M15.4 13.9c2.4.5 4.1 2.6 4.1 5.1"/></svg></a>
           <a class="side-item" href="planting.html" title="Planting Monitoring" aria-label="Planting Monitoring"><svg viewBox="0 0 24 24"><path d="M4 20h16"/><path d="M7 16v-4"/><path d="M12 16V8"/><path d="M17 16v-6"/></svg></a>
         </nav>
-        <div class="page-body-inner" id="pageBody"><div class="loading-note">Memuat data KTH...</div></div>
+        <div class="page-body-inner" id="pageBody"><div class="loading-note">Loading data...</div></div>
       </div>
     </div>
   </div>
@@ -134,8 +134,7 @@ const SHEET_ID='1_8jR1z131_-9k3QVbsaGFRn8MY2JPPiEAgWOZliKo_k';
 const NEWS_GID=0,PENGURUS_GID=859770829;
 const NEWS_URL=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=${NEWS_GID}`;
 const PENGURUS_URL=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=${PENGURUS_GID}`;
-const ARR_SHEET_ID='1-LHCIUy1iD154WczY4Da_-iRaILtvL0mOW4gRW6YQac';
-const PESERTA_URL=`https://docs.google.com/spreadsheets/d/${ARR_SHEET_ID}/gviz/tq?tqx=out:csv&sheet=ARR_SUMMARY`;
+const PESERTA_URL=ARR_URL;
 
 const str=v=>(v??'').toString().trim();
 const fmtInt=v=>(+v||0).toLocaleString('id-ID',{minimumFractionDigits:0,maximumFractionDigits:0});
@@ -391,7 +390,7 @@ document.addEventListener('keydown',e=>{
     const [newsTxt,pengurusTxt,pesertaTxt]=await Promise.all([getText(NEWS_URL),getText(PENGURUS_URL),getText(PESERTA_URL).catch(()=>'')]);
     parseNews(newsTxt);
     parsePengurus(pengurusTxt);
-    if(pesertaTxt)parsePeserta(pesertaTxt);
+    if(pesertaTxt)parsePeserta(arrSummaryCsv(pesertaTxt));
     render();
   }catch(err){
     console.error('LOAD ERROR:',err);

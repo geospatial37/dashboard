@@ -10,6 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="assets/js/ctrl-zoom.js"></script>
   <script src="https://unpkg.com/papaparse@5.4.1/papaparse.min.js"></script>
 <script src="assets/js/sheet-utils.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
@@ -180,6 +181,7 @@
     <div class="content-row">
       <nav class="side-menu">
         <a class="side-item active" href="biodiversity-summary.html" title="Main Page" aria-label="Main Page"><svg viewBox="0 0 24 24"><path d="M4 11.5 12 4l8 7.5"/><path d="M6.5 10v9.5a1 1 0 0 0 1 1h3v-6h3v6h3a1 1 0 0 0 1-1V10"/></svg></a>
+        <a class="side-item" href="species-distribution.html" title="Species Distribution" aria-label="Species Distribution"><svg viewBox="0 0 24 24"><circle cx="6" cy="6.5" r="2.3"/><circle cx="18" cy="8" r="2.3"/><circle cx="9" cy="18" r="2.3"/><path d="M8.3 6.8l7.4.9"/><path d="M6.6 8.7l1.8 7.1"/><path d="M16.5 9.8l-5.9 6.4"/></svg></a>
         <a class="side-item" href="cameratrap-monitoring.html" title="Camera Trap" aria-label="Camera Trap"><svg viewBox="0 0 24 24"><path d="M4 8h3l1.5-2h7L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1Z"/><circle cx="12" cy="13" r="3.5"/></svg></a>
         <a class="side-item" href="bioacoustic-monitoring.html" title="Bioacoustic" aria-label="Bioacoustic"><svg viewBox="0 0 24 24"><path d="M3 12h2"/><path d="M7 8v8"/><path d="M11 5v14"/><path d="M15 9v6"/><path d="M19 7v10"/><path d="M21 12h0"/></svg></a>      </nav>
       <div class="page-body-inner">
@@ -301,7 +303,18 @@
 
 <script>
 const CT_SHEET_ID='1Zkm82R3ct1HY1ov_HL35M9qEJudKPCkf0wGSNGxwdQ4';
-const CT_SHEET_URL=`https://docs.google.com/spreadsheets/d/${CT_SHEET_ID}/export?format=csv&gid=414415821`;
+const CT_SHEET_URL=`https://docs.google.com/spreadsheets/d/${CT_SHEET_ID}/export?format=csv&gid=2019080698`;
+const CT_COLS={
+  batch:['Batch'],site:['Site'],lat:['Latitude','Lat'],lon:['Longitude','Lon','Long'],
+  unit:['CameraID','Camera ID','Unit ID','UnitID'],date:['Date'],cls:['Class'],species:['Species'],
+  local:['Local name','Local_name','Nama lokal'],iucn:['IUCN_status','IUCN status','IUCN'],indep:['Independency','Independent','Indep']
+};
+function headerCols(head,spec){
+  const n=s=>(s||'').toString().trim().toLowerCase().replace(/[_\s]+/g,' ');
+  const keys=head.map(n),idx={};
+  for(const k in spec)idx[k]=spec[k].map(n).map(w=>keys.indexOf(w)).find(i=>i>=0)??-1;
+  return(r,k)=>idx[k]<0?'':(r[idx[k]]??'');
+}
 const BIO_SHEET_ID='1NJPa0nnULKqlihlkZo7J9M6gALi71LZ2_cs-0qz8SuI';
 const BIO_SHEET_URL=`https://docs.google.com/spreadsheets/d/${BIO_SHEET_ID}/export?format=csv&gid=2033661649`;
 const GRID_URL='./assets/json/Grid.json';
@@ -599,10 +612,11 @@ async function loadAll(){
   patrolRows=patrolYearRaw.flat().map(r=>({date:parseDateStr(r[1]),petak:parsePetak(r[5])}))
     .filter(r=>r.date&&r.petak.length);
 
+  const ct=headerCols(ctRaw[0]||[],CT_COLS);
   ctRows=ctRaw.slice(1).map(r=>({
-    Latitude:parseFloat(r[7]),Longitude:parseFloat(r[8]),UnitID:r[9]||'',Date:parseDateStr(r[10]),
-    Class:r[13]||'',Species:(r[14]||'').trim(),LocalName:r[15]||'',IUCN:r[16]||'',
-    Indep:Math.max(0,parseInt(r[17])||0),Source:'cameratrap'
+    Latitude:parseFloat(ct(r,'lat')),Longitude:parseFloat(ct(r,'lon')),UnitID:ct(r,'unit').trim(),Date:parseDateStr(ct(r,'date')),
+    Class:ct(r,'cls'),Species:ct(r,'species').trim(),LocalName:ct(r,'local'),IUCN:ct(r,'iucn').trim(),
+    Indep:Math.max(0,parseInt(ct(r,'indep'))||0),Source:'cameratrap'
   })).filter(r=>r.Species&&!isNaN(r.Latitude)&&!isNaN(r.Longitude));
 
   bioRows=bioRaw.slice(1).map(r=>({
@@ -640,11 +654,11 @@ async function loadAll(){
   allCt=ctRows;allBio=bioRows;allHunting=huntingRecords;
   const normSp=s=>(s||'').trim().toLowerCase();
   keySpeciesRows=[
-    ...ctRaw.slice(1).map(r=>({unit:(r[9]||'').trim(),date:parseDateStr(r[10]),species:normSp(r[14]),indep:Math.max(0,parseInt(r[17])||0)})),
+    ...ctRaw.slice(1).map(r=>({unit:ct(r,'unit').trim(),date:parseDateStr(ct(r,'date')),species:normSp(ct(r,'species')),indep:Math.max(0,parseInt(ct(r,'indep'))||0)})),
     ...bioRaw.slice(1).map(r=>({unit:(r[0]||'').trim(),date:parseDateStr(r[7]),species:normSp(r[10]),indep:1}))
   ].filter(r=>r.unit&&r.date&&r.species);
-  ctDeployments=buildDeployments(ctRaw.slice(1).map(r=>({id:normUnitId(r[9]),name:normUnitId(r[9]),batch:(r[2]||'').trim(),
-    site:(r[6]||'').trim(),date:parseDateStr(r[10])})));
+  ctDeployments=buildDeployments(ctRaw.slice(1).map(r=>({id:normUnitId(ct(r,'unit')),name:normUnitId(ct(r,'unit')),batch:ct(r,'batch').trim(),
+    site:ct(r,'site').trim(),date:parseDateStr(ct(r,'date'))})));
   bioDeployments=buildDeployments(bioRaw.slice(1).map(r=>({id:normUnitId(r[0]),name:(r[0]||'').trim(),batch:(r[1]||'').trim(),
     site:(r[3]||'').trim()?`grid ${(r[3]||'').trim()}`:'',date:parseDateStr(r[7])})));
   buildApexPredatorSpecies();
